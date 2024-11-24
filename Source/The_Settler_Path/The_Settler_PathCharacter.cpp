@@ -4,12 +4,15 @@
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Interactible.h"
+#include "DA_Weapon.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -20,7 +23,7 @@ AThe_Settler_PathCharacter::AThe_Settler_PathCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -50,8 +53,15 @@ AThe_Settler_PathCharacter::AThe_Settler_PathCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	interactBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractBox"));
+	interactBox->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+	interactBox->SetBoxExtent(FVector(35.0f, 35.0f, 75.0f));
+	interactBox->SetupAttachment(RootComponent);
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	interactBox->OnComponentBeginOverlap.AddDynamic(this, &AThe_Settler_PathCharacter::OnCollisionEnter);
+	interactBox->OnComponentEndOverlap.AddDynamic(this, &AThe_Settler_PathCharacter::OnCollisionExit);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,7 +85,7 @@ void AThe_Settler_PathCharacter::SetupPlayerInputComponent(UInputComponent* Play
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -85,10 +95,38 @@ void AThe_Settler_PathCharacter::SetupPlayerInputComponent(UInputComponent* Play
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AThe_Settler_PathCharacter::Look);
+
+		//Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &AThe_Settler_PathCharacter::Interact);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
+void AThe_Settler_PathCharacter::OnCollisionEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
+{
+	if (OtherActor == this)
+		return;
+
+	IInteractible* interactibleActor = Cast<IInteractible>(OtherActor);
+
+	if (interactibleActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Interactible is added"));
+		interactiblesActors.AddUnique(interactibleActor);
+	}
+}
+
+void AThe_Settler_PathCharacter::OnCollisionExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	IInteractible* interactibleActor = Cast<IInteractible>(OtherActor);
+
+	if (interactibleActor)
+	{
+		interactiblesActors.Remove(interactibleActor);
+		UE_LOG(LogTemp, Warning, TEXT("Interactible is remove"));
 	}
 }
 
@@ -105,7 +143,7 @@ void AThe_Settler_PathCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -126,4 +164,23 @@ void AThe_Settler_PathCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AThe_Settler_PathCharacter::Interact()
+{
+	if (isInteracting || interactiblesActors.IsEmpty())
+		return;
+
+	/*interactiblesActors.Sort([this](AActor& A, AActor& B)
+		{
+			float distA = FVector::Dist(A.GetActorLocation(), GetActorLocation());
+			float distB = FVector::Dist(B.GetActorLocation(), GetActorLocation());
+
+			return distA < distB;
+		});*/
+
+	interactiblesActors[0]->Interact();
+
+	isInteracting = true;
+	UE_LOG(LogTemp, Warning, TEXT("Interacting"));
 }
