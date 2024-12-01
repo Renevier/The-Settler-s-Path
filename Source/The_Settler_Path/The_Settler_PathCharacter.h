@@ -54,7 +54,6 @@ class AThe_Settler_PathCharacter : public ACharacter
 
 public:
 	AThe_Settler_PathCharacter();
-	
 
 protected:
 
@@ -67,8 +66,6 @@ protected:
 	/** Called for interact input */
 	void Interact();
 
-protected:
-
 	virtual void NotifyControllerChanged() override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -78,19 +75,20 @@ protected:
 	UFUNCTION()
 	void OnCollisionExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-protected:
-
-	bool isInteracting{ false };
-
-	TArray<class IInteractible*> interactiblesActors;
-
-	class DA_Weapon* weapon;
-
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+private:
+
+	IInteractible* GetNearestHarvesableResource();
+
+protected:
+
+	bool isInteracting{ false };
+	TArray<class IInteractible*> interactiblesActors;
+	class DA_Weapon* weapon;
 };
 

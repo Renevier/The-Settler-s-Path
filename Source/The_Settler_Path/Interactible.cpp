@@ -2,5 +2,6 @@
 
 
 #include "Interactible.h"
+#include "The_Settler_PathCharacter.h"
 
 // Add default functionality here for any IInteractible functions that are not pure virtual.

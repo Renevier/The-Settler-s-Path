@@ -2,7 +2,6 @@
 
 
 #include "Resource_spot.h"
-#include "DA_Resource.h"
 
 // Sets default values
 AResource_spot::AResource_spot()

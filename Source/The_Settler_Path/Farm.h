@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Resource_spot.h"
-#include "Tree.generated.h"
+#include "Farm.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class THE_SETTLER_PATH_API ATree : public AResource_spot, public IInteractible
+class THE_SETTLER_PATH_API AFarm : public AResource_spot, public IInteractible
 {
 	GENERATED_BODY()
 	

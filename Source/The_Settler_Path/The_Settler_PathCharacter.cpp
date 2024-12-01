@@ -130,6 +130,25 @@ void AThe_Settler_PathCharacter::OnCollisionExit(UPrimitiveComponent* Overlapped
 	}
 }
 
+IInteractible* AThe_Settler_PathCharacter::GetNearestHarvesableResource()
+{
+	float minDist = 9999.0f;
+	IInteractible* nearestInteractibleObject = nullptr;
+
+	for (auto interactibleActor : interactiblesActors)
+	{
+		float dist = FVector::Dist(Cast<AActor>(interactibleActor)->GetActorLocation(), GetActorLocation());
+
+		if (dist < minDist)
+		{
+			nearestInteractibleObject = interactibleActor;
+			minDist = dist;
+		}
+	}
+
+	return nearestInteractibleObject;
+}
+
 void AThe_Settler_PathCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -171,15 +190,7 @@ void AThe_Settler_PathCharacter::Interact()
 	if (isInteracting || interactiblesActors.IsEmpty())
 		return;
 
-	/*interactiblesActors.Sort([this](AActor& A, AActor& B)
-		{
-			float distA = FVector::Dist(A.GetActorLocation(), GetActorLocation());
-			float distB = FVector::Dist(B.GetActorLocation(), GetActorLocation());
-
-			return distA < distB;
-		});*/
-
-	interactiblesActors[0]->Interact();
+	GetNearestHarvesableResource()->Interact(this);
 
 	isInteracting = true;
 	UE_LOG(LogTemp, Warning, TEXT("Interacting"));

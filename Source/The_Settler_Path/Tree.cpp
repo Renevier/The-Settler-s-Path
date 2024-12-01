@@ -1,28 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "Tree.h"
-#include "Resource_spot.h"
-#include "Interactible.h"
 
-// Sets default values
-ATree::ATree()
+void ATree::Interact(AThe_Settler_PathCharacter* player)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	UE_LOG(LogTemp, Warning, TEXT("ATree::Interact() called!"));
 }
-
-// Called when the game starts or when spawned
-void ATree::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ATree::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

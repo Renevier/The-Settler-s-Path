@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interactible.h"
+#include "DA_Resource.h"
 #include "Resource_spot.generated.h"
-
-class DA_Resouce;
 
 UCLASS()
 class THE_SETTLER_PATH_API AResource_spot : public AActor
 {
 	GENERATED_BODY()
 	
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	DA_Resouce* resource;*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UDA_Resource* resource;
 
 public:	
 	// Sets default values for this actor's properties

@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "Interactible.generated.h"
 
+class AThe_Settler_PathCharacter;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UInteractible : public UInterface
@@ -22,5 +24,5 @@ class THE_SETTLER_PATH_API IInteractible
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Interact() = 0;
+	virtual void Interact(AThe_Settler_PathCharacter* player) = 0;
 };
